@@ -1,10 +1,10 @@
 import React from "react";
 import NavBar from "../navbar/NavBar";
 
-const TimeSheet = () => {
+const TimeSheet = (prop) => {
   return (
     <div>
-      <NavBar />
+        <NavBar setAuthed={prop.setAuthed}/>
       <div>
         Time Sheet
       </div>

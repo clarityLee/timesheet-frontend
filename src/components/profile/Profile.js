@@ -40,7 +40,8 @@ class Profile extends React.Component {
         }
         this.changed.set("phone", false);
         this.changed.set("email", false);
-        this.changed.set("address", false);   
+        this.changed.set("address", false);
+        this.setAuthed = props.setAuthed;
   }
 
     handleInputChange = (event) => {
@@ -82,7 +83,7 @@ class Profile extends React.Component {
   render() {
       return (
           <div>
-            <NavBar />
+            <NavBar setAuthed={this.setAuthed}/>
             <div className="container">
                 <div className="row text-center" >
                         <div>

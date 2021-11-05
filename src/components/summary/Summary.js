@@ -6,7 +6,7 @@ import { withRouter } from "react-router-dom";
 
 const URL = "http://localhost:9000/user"; //endpoint to get data
 
-const Summary = () => {
+const Summary = (prop) => {
   const [employees, setEmployees] = useState([]);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const Summary = () => {
 
   return (
     <div>
-      <NavBar />
+      <NavBar setAuthed={prop.setAuthed}/>
 
       <h1 id="title">Employee Summary</h1>
       <table id="employee">
