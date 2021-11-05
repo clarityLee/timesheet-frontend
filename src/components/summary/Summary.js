@@ -2,15 +2,18 @@ import React, { useState, useEffect } from "react";
 import NavBar from "../navbar/NavBar";
 
 import axios from "axios";
-import { withRouter } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
-  const [employees, setEmployees] = useState([]);
+  const [data, setData] = useState([]);
   const getData = async () => {
-    const response = await axios.get(URL);
-    setEmployees(response.data);
+    const response = await axios.get(URL, { withCredentials: true });
+    console.log(response);
+
+    setData(response.data);
+    console.log(data);
   };
 
   useEffect(() => {
@@ -19,7 +22,6 @@ const Summary = (prop) => {
 
   const renderHeader = () => {
     let headerElement = [
-      "id",
       "WeekEnding",
       "Total Hours",
       "Submission Status",
@@ -33,18 +35,16 @@ const Summary = (prop) => {
     });
   };
 
-  const editData = (id) => {
-    this.props.history.push("/timesheet");
-  };
-
   const renderBody = () => {
+    console.log(data.timeSheets);
+
     return (
-      employees &&
-      employees.map(
+      data.timeSheets &&
+      data.timeSheets.map(
         ({
           id,
           weekEnding,
-          billingHours,
+          billingHouse,
           submissionStatus,
           approvalStatus,
           comment,
@@ -52,13 +52,19 @@ const Summary = (prop) => {
           return (
             <tr key={id}>
               <td>{weekEnding}</td>
-              <td>{billingHours}</td>
+              <td>{billingHouse}</td>
               <td>{submissionStatus}</td>
               <td>{approvalStatus}</td>
               <td className="option">
-                <button className="button" onClick={() => editData(id)}>
-                  edit
-                </button>
+                {data.timeSheets.approvalStatus == "approved" ? (
+                  <Link to="/timesheet" className="navItem">
+                    edit
+                  </Link>
+                ) : (
+                  <Link to="/timesheet" className="navItem">
+                    view
+                  </Link>
+                )}
               </td>
               <td>{comment}</td>
             </tr>
