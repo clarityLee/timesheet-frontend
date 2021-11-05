@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import {Link} from "react-router-dom";
 import { useNavigate  } from 'react-router-dom';
+import { useAuth } from '../../contexts/auth';
 import './NavBar.css';
 
 const NavBar = () => {
-
-  const[ isAutheticated, setisAutheticated ] = useState(false);
+  const auth = useAuth();
 
   let navigate = useNavigate ();
   let handleLogout = e => {
     e.preventDefault();
-    setisAutheticated(false);
-    window.sessionStorage.removeItem("username");
+    auth.logout();
     navigate("/login");
   };
   return (

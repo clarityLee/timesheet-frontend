@@ -1,10 +1,10 @@
 import React from "react";
 import NavBar from "../navbar/NavBar";
 
-const Profile = () => {
+const Profile = (prop) => {
   return (
     <div>
-      <NavBar />
+        <NavBar setAuthed={prop.setAuthed}/>
       <div>
         Profile
       </div>

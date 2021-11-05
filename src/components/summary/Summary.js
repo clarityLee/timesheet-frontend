@@ -1,10 +1,10 @@
 import React from "react";
 import NavBar from "../navbar/NavBar";
 
-const Summary = () => {
+const Summary = (prop) => {
   return (
     <div>
-      <NavBar />
+        <NavBar setAuthed={prop.setAuthed}/>
       <div>
         Summary
       </div>
