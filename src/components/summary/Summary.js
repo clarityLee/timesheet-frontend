@@ -3,7 +3,7 @@ import NavBar from "../navbar/NavBar";
 
 import axios from "axios";
 import { Link } from "react-router-dom";
-
+import "./Summary.css";
 const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
@@ -78,7 +78,7 @@ const Summary = (prop) => {
       <NavBar setAuthed={prop.setAuthed} />
 
       <h1 id="title">Employee Summary</h1>
-      <table id="employee">
+      <table class="table" id="employee">
         <thead>
           <tr>{renderHeader()}</tr>
         </thead>
