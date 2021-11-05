@@ -10,10 +10,8 @@ const Summary = (prop) => {
   const [data, setData] = useState([]);
   const getData = async () => {
     const response = await axios.get(URL, { withCredentials: true });
-    console.log(response);
 
     setData(response.data);
-    console.log(data);
   };
 
   useEffect(() => {
@@ -49,6 +47,7 @@ const Summary = (prop) => {
           approvalStatus,
           comment,
         }) => {
+          console.log(data.timeSheets.approvalStatus);
           return (
             <tr key={id}>
               <td>{weekEnding}</td>
@@ -56,7 +55,7 @@ const Summary = (prop) => {
               <td>{submissionStatus}</td>
               <td>{approvalStatus}</td>
               <td className="option">
-                {data.timeSheets.approvalStatus == "approved" ? (
+                {approvalStatus == "approved" ? (
                   <Link to="/timesheet" className="navItem">
                     edit
                   </Link>
