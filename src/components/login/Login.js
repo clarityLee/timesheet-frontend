@@ -1,16 +1,19 @@
 import React, { useState, useContext, useLocation } from "react";
-import { useNavigate  } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/auth";
 
 const Login = (prop) => {
   const auth = useAuth();
-  const [username, setUsername] = useState('john');
-  const [password, setPassword] = useState('123');
+  const [username, setUsername] = useState("john");
+  const [password, setPassword] = useState("123");
 
   const navigate = useNavigate();
 
   let handleLogin = () => {
-    auth.login(username, password, () => {navigate("/summary")});
+    auth.login(username, password, () => {
+      navigate("/summary");
+    });
+    // navigate("/summary");
   };
 
   let handleNameChange = (e) => {
@@ -22,17 +25,31 @@ const Login = (prop) => {
   };
 
   return (
-      <div className="ui form">
-        <div>
-          <label htmlFor="username">username:</label>
-          <input type="text" id="username" name="username" onChange={ handleNameChange } value={username}/>
-        </div>
-        <div>
-          <label htmlFor="password">password:</label>
-          <input type="password" id="password" name="password" onChange={ handlePasswordChange } value={password}/>
-        </div>
-        <button onClick={handleLogin} className="ui button primary">submit</button>
+    <div className="ui form">
+      <div>
+        <label htmlFor="username">username:</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          onChange={handleNameChange}
+          value={username}
+        />
       </div>
+      <div>
+        <label htmlFor="password">password:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          onChange={handlePasswordChange}
+          value={password}
+        />
+      </div>
+      <button onClick={handleLogin} className="ui button primary">
+        submit
+      </button>
+    </div>
   );
 };
 

@@ -4,19 +4,18 @@ import NavBar from "../navbar/NavBar";
 import axios from "axios";
 import { withRouter } from "react-router-dom";
 
-const URL = "http://localhost:9000/user"; //endpoint to get data
+const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
   const [employees, setEmployees] = useState([]);
-
-  useEffect(() => {
-    getData();
-  }, []);
-
   const getData = async () => {
     const response = await axios.get(URL);
     setEmployees(response.data);
   };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   const renderHeader = () => {
     let headerElement = [
@@ -32,6 +31,10 @@ const Summary = (prop) => {
     return headerElement.map((key, index) => {
       return <th key={index}>{key}</th>;
     });
+  };
+
+  const editData = (id) => {
+    this.props.history.push("/timesheet");
   };
 
   const renderBody = () => {
@@ -65,13 +68,9 @@ const Summary = (prop) => {
     );
   };
 
-  const editData = (id) => {
-    this.props.history.push("/timesheet");
-  };
-
   return (
     <div>
-      <NavBar setAuthed={prop.setAuthed}/>
+      <NavBar setAuthed={prop.setAuthed} />
 
       <h1 id="title">Employee Summary</h1>
       <table id="employee">
