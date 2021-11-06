@@ -55,7 +55,7 @@ const Summary = (prop) => {
               <td>{weekEnding}</td>
               <td>{billingHouse}</td>
               <td>
-                {submissionStatus == "incomplete" ? (
+                {submissionStatus != "incomplete" ? (
                   <p>{submissionStatus}</p>
                 ) : (
                   <p>
