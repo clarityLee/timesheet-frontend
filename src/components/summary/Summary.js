@@ -4,10 +4,12 @@ import NavBar from "../navbar/NavBar";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import "./Summary.css";
+import ReactTooltip from "react-tooltip";
 const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
   const [data, setData] = useState([]);
+
   const getData = async () => {
     const response = await axios.get(URL, { withCredentials: true });
 
@@ -52,7 +54,26 @@ const Summary = (prop) => {
             <tr key={id}>
               <td>{weekEnding}</td>
               <td>{billingHouse}</td>
-              <td>{submissionStatus}</td>
+              <td>
+                {submissionStatus == "incomplete" ? (
+                  <p>{submissionStatus}</p>
+                ) : (
+                  <p>
+                    {submissionStatus}
+                    <img
+                      src="https://www.pngitem.com/pimgs/m/517-5177855_info-icon-svg-hd-png-download.png"
+                      width="25"
+                      height="20"
+                      data-tip
+                      data-for="submissionTip"
+                    />
+                    <ReactTooltip id="submissionTip" place="top" effect="solid">
+                      Proof of approved time sheet is required OR Approval
+                      denied by Admin, please contact your HR manager
+                    </ReactTooltip>
+                  </p>
+                )}
+              </td>
               <td>{approvalStatus}</td>
               <td className="option">
                 {approvalStatus == "approved" ? (
@@ -65,7 +86,25 @@ const Summary = (prop) => {
                   </Link>
                 )}
               </td>
-              <td>{comment}</td>
+              <td>
+                {comment == "" ? (
+                  <p>{comment}</p>
+                ) : (
+                  <p>
+                    {comment}
+                    <img
+                      src="https://www.pngitem.com/pimgs/m/517-5177855_info-icon-svg-hd-png-download.png"
+                      width="25"
+                      height="20"
+                      data-tip
+                      data-for="commentTip"
+                    />
+                    <ReactTooltip id="commentTip" place="top" effect="solid">
+                      remaining floating/vacation days: 2
+                    </ReactTooltip>
+                  </p>
+                )}
+              </td>
             </tr>
           );
         }
