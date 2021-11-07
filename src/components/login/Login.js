@@ -1,16 +1,22 @@
-import React, { useState, useContext, useLocation } from "react";
+import React, { useState } from "react";
 import { useNavigate  } from 'react-router-dom';
-import { useAuth } from '../../contexts/auth';
+import { useAppContext } from '../../contexts/AppContext';
 
 const Login = (prop) => {
-  const auth = useAuth();
+  const auth = useAppContext();
   const [username, setUsername] = useState('john');
   const [password, setPassword] = useState('123');
 
   const navigate = useNavigate();
 
   let handleLogin = () => {
-    auth.login(username, password, () => {navigate("/summary")});
+    auth.login(username, password, 
+      () => navigate("/summary"),
+      err => {
+        console.log('login failed');
+        console.log(err);
+      }
+    );
   };
 
   let handleNameChange = (e) => {

@@ -4,7 +4,7 @@ import NavBar from "../navbar/NavBar";
 import axios from "axios";
 import { withRouter } from "react-router-dom";
 
-const URL = "http://localhost:9000/user"; //endpoint to get data
+const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
   const [employees, setEmployees] = useState([]);
@@ -14,7 +14,7 @@ const Summary = (prop) => {
   }, []);
 
   const getData = async () => {
-    const response = await axios.get(URL);
+    const response = await axios.get(URL, {withCredentials: true});
     setEmployees(response.data);
   };
 

@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from './login/Login'
 import Summary from './summary/Summary';
 import TimeSheet from './timesheet/TimeSheet';
 import Profile from './profile/Profile';
 import PrivateRoute from './PrivateRoute';
-import AuthProvider from '../contexts/AuthProvider';
+import AppContextProvider from '../contexts/AppContextProvider';
 
 const App = () => {
   return (
-      <AuthProvider>
+      <AppContextProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<PrivateRoute><Summary /></PrivateRoute>} />
@@ -19,7 +19,7 @@ const App = () => {
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
+      </AppContextProvider>
   );
 };
 
