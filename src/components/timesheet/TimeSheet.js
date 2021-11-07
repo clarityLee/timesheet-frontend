@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
-// import axios from "axios";
-import AppConext, { useAppContext } from "../../contexts/AppContext";
+import React from "react";
+import AppContext from "../../contexts/AppContext";
 import NavBar from "../navbar/NavBar";
 import Select from "react-select";
 import './TimeSheet.css';
@@ -8,7 +7,7 @@ import Row from './Row';
 import axios from "axios";
 
 class TimeSheet extends React.Component {
-  static contextType = AppConext;
+  static contextType = AppContext;
   saveUrl = 'http://localhost:9000/timesheet-service/save';
   getUrl = 'http://localhost:9000/timesheet-service/read';
 
@@ -18,8 +17,8 @@ class TimeSheet extends React.Component {
       billing: 0,
       compensated: 0,
       timeSheet: null,
-      selectedWeekend: context.selectedWeekend,
-      weekends:  context.weekends
+      selectedWeekend: context.getSelectedWeekend(),
+      weekends:  context.getWeekends()
     }
     this.loadTimeSheet = this.loadTimeSheet.bind(this);
     this.onDayChange = this.onDayChange.bind(this);
@@ -96,11 +95,8 @@ class TimeSheet extends React.Component {
     const defaultTimeSheet = this.defaultTimeSheet;
     axios.get(url, {WithCredentials: true}).then(
       resp => {
-        console.log(resp);
         let ts = resp.data;
         if (ts.id === null) {
-          console.log('loading default timeSheet');
-          console.log(this.defaultTimeSheet);
           ts = JSON.parse(JSON.stringify(defaultTimeSheet));
         }
 

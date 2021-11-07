@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import NavBar from "../navbar/NavBar";
+import { useAppContext } from "../../contexts/AppContext";
 
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -8,7 +10,9 @@ import ReactTooltip from "react-tooltip";
 const URL = "http://localhost:9000/user-service/user"; //endpoint to get data
 
 const Summary = (prop) => {
+  const context = useAppContext();
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   const getData = async () => {
     const response = await axios.get(URL, { withCredentials: true });
@@ -33,6 +37,13 @@ const Summary = (prop) => {
     return headerElement.map((key, index) => {
       return <th key={index}>{key}</th>;
     });
+  };
+
+  const gotoTimeSheet = e => {
+    e.preventDefault();
+    context.setSelectedWeekendStr(e.target.attributes.weekending.value);
+    navigate("/timesheet");
+    console.log(e);
   };
 
   const renderBody = () => {
@@ -81,9 +92,9 @@ const Summary = (prop) => {
                     edit
                   </Link>
                 ) : (
-                  <Link to="/timesheet" className="navItem">
+                  <a href="" className="navItem" onClick={gotoTimeSheet} weekEnding={weekEnding}>
                     view
-                  </Link>
+                  </a>
                 )}
               </td>
               <td>
