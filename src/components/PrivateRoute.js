@@ -5,6 +5,6 @@ import { useAppContext } from '../contexts/AppContext';
 function PrivateRoute ({children}) {
   const auth = useAppContext();
   return auth.isAuthed() ? children : <Navigate to="/login" />
-};
+}
 
 export default PrivateRoute;

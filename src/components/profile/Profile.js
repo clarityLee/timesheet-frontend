@@ -1,5 +1,6 @@
 import React from "react";
 import NavBar from "../navbar/NavBar";
+import axios from 'axios';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Profile.css'
@@ -24,17 +25,18 @@ class Profile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            phone: "1234567890",
-            email: "123@gmail.com",
-            address: "123 address",
+            username: "",
+            phone: "",
+            email: "",
+            address: "",
             emergencyContact: [
                 {
-                    name: "emergency 1",
-                    phone: "emergency phone 1"
+                    fullName: "",
+                    phone: ""
                 },
                 {
-                    name: "emergency 2",
-                    phone: "emergency phone 2"
+                    fullName: "",
+                    phone: ""
                 }
             ]
         }
@@ -43,6 +45,23 @@ class Profile extends React.Component {
         this.changed.set("address", false);
         this.setAuthed = props.setAuthed;
   }
+
+    componentDidMount() {
+        axios.get(`http://localhost:9000/user-service/user-profile`, {withCredentials:true})
+            .then( response => {
+                const data = response.data;
+                console.log(data)
+                this.setState({
+                    username: data.username,
+                    phone: data.phone,
+                    email: data.email,
+                    address: data.address,
+                })
+                if (data.contacts) {
+                    this.setState({ emergencyContact: data.contacts });
+                }
+            } )
+    }
 
     handleInputChange = (event) => {
         const name = event.target.name;
@@ -69,21 +88,19 @@ class Profile extends React.Component {
             return;
         }
 
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedInfo)
-        };
-        fetch('https://localhost/58717/user-service/update-profile', requestOptions)
-            .then(response => response.json())
-            .then(data => console.log(data));
-            // .then(data => this.setState({ postId: data.id }));
+        axios.post(`http://localhost:9000/user-service/update-profile`, updatedInfo, {withCredentials:true})
+            .then(
+              (resp) => { response => response.json() }
+            ).then(
+                data => console.log(data)
+            )
     }
 
   render() {
       return (
           <div>
-            <NavBar setAuthed={this.setAuthed}/>
+          <NavBar setAuthed={this.setAuthed}/>
+          <br />
             <div className="container">
                 <div className="row text-center" >
                         <div>
@@ -111,7 +128,8 @@ class Profile extends React.Component {
                             </div>
                             <div>
                                 <textarea 
-                                    rows="3" cols="40" 
+                                    rows="3"
+                                    style={{width: "358px"}}
                                     name="address" 
                                     placeholder="address"
                                     defaultValue={this.state.address}
@@ -125,7 +143,7 @@ class Profile extends React.Component {
                                     <h5>Emergency Contact 1</h5>
                                 </div>
                                 <div className="input">
-                                    <input type="text" name="name" value={this.state.emergencyContact[0].name} style={{width: "358px"}} disabled={true} />
+                                    <input type="text" name="name" value={this.state.emergencyContact[0].fullName} style={{width: "358px"}} disabled={true} />
                                 </div>
                                 <div className="input">
                                     <input type="text" name="phone" value={this.state.emergencyContact[0].phone} style={{width: "358px"}} disabled={true} />
@@ -136,7 +154,7 @@ class Profile extends React.Component {
                                     <h5>Emergency Contact 2</h5>
                                 </div>
                                 <div className="input">
-                                    <input type="text" name="name" value={this.state.emergencyContact[1].name} style={{width: "358px"}} disabled={true} />
+                                    <input type="text" name="name" value={this.state.emergencyContact[1].fullName} style={{width: "358px"}} disabled={true} />
                                 </div>
                                 <div className="input">
                                     <input type="text" name="phone" value={this.state.emergencyContact[1].phone} style={{width: "358px"}} disabled={true} />

@@ -234,6 +234,6 @@ class TimeSheet extends React.Component {
       </div>
     );
   }
-};
+}
 
 export default TimeSheet;

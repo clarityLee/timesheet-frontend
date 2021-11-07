@@ -1,3 +1,10 @@
 .navItem {
   margin: 10px;
 }
+
+.navbar-collapse {
+  margin-left: 10px;
+}
+.rightstyle {
+  margin-right: 10px;
+}
