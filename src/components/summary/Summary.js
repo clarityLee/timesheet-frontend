@@ -31,16 +31,14 @@ const Summary = (prop) => {
   };
 
   useEffect(() => {
-    getData().then(() => {
-      hasCurrent();
-    });
+    getData();
     getAll();
 
-    // hasCurrent();
+    hasCurrent();
   }, []);
 
   const hasCurrent = () => {
-    setCheck(true);
+    setCheck(false);
   };
 
   const renderCurrent = () => {
@@ -83,8 +81,8 @@ const Summary = (prop) => {
   };
 
   const renderBody = () => {
+    console.log(data.timeSheets);
     console.log(data);
-    console.log(check);
     console.log(context.getCurrentWeekendStr());
 
     return (
@@ -97,6 +95,8 @@ const Summary = (prop) => {
           submissionStatus,
           approvalStatus,
           comment,
+          floating,
+          vacation,
         }) => {
           return (
             <tr key={id}>
@@ -124,7 +124,7 @@ const Summary = (prop) => {
               </td>
               <td>{approvalStatus}</td>
               <td className="option">
-                {approvalStatus == "approved" ? (
+                {approvalStatus == "Not Approved" ? (
                   <Link to="/timesheet" className="navItem">
                     edit
                   </Link>
@@ -153,7 +153,7 @@ const Summary = (prop) => {
                       data-for="commentTip"
                     />
                     <ReactTooltip id="commentTip" place="top" effect="solid">
-                      remaining floating/vacation days: 2
+                      remaining floating/vacation days: {data.floating}
                     </ReactTooltip>
                   </p>
                 )}
@@ -185,6 +185,8 @@ const Summary = (prop) => {
           submissionStatus,
           approvalStatus,
           comment,
+          floating,
+          vacation,
         }) => {
           console.log(data.timeSheets.approvalStatus);
           return (
@@ -213,7 +215,7 @@ const Summary = (prop) => {
               </td>
               <td>{approvalStatus}</td>
               <td className="option">
-                {approvalStatus == "approved" ? (
+                {approvalStatus == "Not Approved" ? (
                   <Link to="/timesheet" className="navItem">
                     edit
                   </Link>
@@ -242,7 +244,7 @@ const Summary = (prop) => {
                       data-for="commentTip"
                     />
                     <ReactTooltip id="commentTip" place="top" effect="solid">
-                      remaining floating/vacation days: 2
+                      remaining floating/vacation days: {data.floating}
                     </ReactTooltip>
                   </p>
                 )}
