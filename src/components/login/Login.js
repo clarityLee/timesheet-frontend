@@ -4,8 +4,8 @@ import { useAppContext } from '../../contexts/AppContext';
 
 const Login = (prop) => {
   const auth = useAppContext();
-  const [username, setUsername] = useState('john');
-  const [password, setPassword] = useState('123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const navigate = useNavigate();
 
