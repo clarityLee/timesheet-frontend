@@ -39,6 +39,7 @@ const Summary = (prop) => {
 
   const hasCurrent = () => {
     setCheck(false);
+    
   };
 
   const renderCurrent = () => {
@@ -265,7 +266,7 @@ const Summary = (prop) => {
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {check ? (
+          {data.username == "sam" ? (
             <tbody>{renderBody()}</tbody>
           ) : (
             <tbody>
@@ -278,7 +279,7 @@ const Summary = (prop) => {
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {check ? (
+          {data.username == "sam" ? (
             <tbody>{renderBodyAll()}</tbody>
           ) : (
             <tbody>
