@@ -38,7 +38,8 @@ class Profile extends React.Component {
                     fullName: "",
                     phone: ""
                 }
-            ]
+            ],
+            shownSpan: "not-show"
         }
         this.changed.set("phone", false);
         this.changed.set("email", false);
@@ -92,8 +93,14 @@ class Profile extends React.Component {
             .then(
               (resp) => { response => response.json() }
             ).then(
-                data => console.log(data)
+                data => {
+                    console.log(data)
+                    this.setState({
+                        shownSpan: ""
+                    })
+                }
             )
+                
     }
 
   render() {
@@ -163,6 +170,10 @@ class Profile extends React.Component {
                         </div>
                         <div>
                             <button className="btn btn-primary" onClick={this.updateInfo}>Update</button>
+                        </div>
+                        <div
+                            className={this.state.shownSpan}>
+                            <p><span class="small" style={{color: "red"}}>Successfully update!</span></p>
                         </div>
                 </div>
             </div>

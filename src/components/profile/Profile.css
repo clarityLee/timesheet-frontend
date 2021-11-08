@@ -10,3 +10,6 @@ Container {
 .input {
     height: 40px;
 }
+.not-show{
+    display: none;
+}
