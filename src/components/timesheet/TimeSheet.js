@@ -62,7 +62,11 @@ class TimeSheet extends React.Component {
     {value: 'unapproved', label: 'Unapproved Timesheet'}
   ];
   addData = (sheet) => {
+    console.log('addData!');
     let date = this.convertToDate(sheet.weekEnding);
+
+    let bh = 0;
+    let ch = 0;
     for (let i = 6, j=0 ; i >= 0 ; --i, ++j) {
 
       let d = new Date(date);
@@ -87,6 +91,15 @@ class TimeSheet extends React.Component {
       day['isWeekend'] = weekday === 'Sunday' || weekday === 'Saturday' || day.holiday;
       day['optionDisabled'] = day.isWeekend || day.floating || day.holiday || day.vacation;
       day['resetOptions'] = true;
+
+      if (weekday !== 'Sunday' && weekday !== 'Saturday' && day.holiday) {
+        ch += 8;
+      } else {
+        bh += day.totalHours;
+        ch += day.totalHours;
+      }
+      sheet.billingHours = bh;
+      sheet.compensatedHours = ch;
     }
   };
 
