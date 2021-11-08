@@ -5,11 +5,12 @@ import Select from 'react-select';
 import NavBar from '../navbar/NavBar';
 import Row from './Row';
 import isHoliday from './holidays';
-import { getDefaultTimesheet, setDefaultTimesheet } from "./TimeSheetModel";
+import {getDefaultTimesheet, setDefaultTimesheet} from "./TimeSheetModel";
 import './TimeSheet.css';
 
 class TimeSheet extends React.Component {
   static contextType = AppContext;
+  userUrl = 'http://localhost:9000/user-service/user';
   saveUrl = 'http://localhost:9000/timesheet-service/save';
   saveFileUrl = 'http://localhost:9000/timesheet-service/saveFile'
   getUrl = 'http://localhost:9000/timesheet-service/read';
@@ -25,13 +26,29 @@ class TimeSheet extends React.Component {
       weekends:  [],
       selectedFile: null,
       btnSaved: false,
+      floatingLeft: 0,
+      vacationLeft: 0
     }
     this.loadTimeSheet = this.fetchTimeSheet.bind(this);
     this.onDayChange = this.onDayChange.bind(this);
     this.saveTimeSheet = this.saveTimeSheet.bind(this);
     this.setDefault = this.setDefault.bind(this);
+    this.saveTimeSheet = this.saveTimeSheet.bind(this);
+    this.fetchTimeSheet = this.fetchTimeSheet.bind(this);
   }
+  user = {floating: 0, vacation: 0};
+
+  componentDidMount () {
+    this.fetchUserData();
+    this.fetchTimeSheet(this.state.selectedWeekend);
+    this.fetchTimeSheets();
+  }
+
   btnSaved = '';
+  floatingRequired = 0;
+  vacationRequired = 0;
+  maxFloating = 0;
+  maxVacation = 0;
   weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   labels = [
     '0:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM', 
@@ -72,7 +89,22 @@ class TimeSheet extends React.Component {
       day['resetOptions'] = true;
     }
   };
-  
+
+  fetchUserData = () => {
+    axios.get(this.userUrl, { withCredentials: true}).then(
+        resp => {
+          this.user = resp.data;
+          this.maxFloating = this.user.floating + this.floatingRequired;
+          this.maxVacation = this.user.vacation + this.vacationRequired;
+          this.setState({
+            floatingLeft: this.maxFloating - this.floatingRequired,
+            vacationLeft: this.maxVacation - this.vacationRequired
+          });
+        },
+        err => console.log(err)
+    );
+  }
+
   fetchTimeSheet = (selectedOption) => {
     const username = window.sessionStorage.getItem('username');
     const url = this.getUrl + '?username=' + username + '&weekEnding=' + selectedOption.value;
@@ -80,12 +112,27 @@ class TimeSheet extends React.Component {
     axios.get(url, { withCredentials: true }).then(
       resp => {
         let ts = resp.data;
-        if (ts.id === null) ts = getDefaultTimesheet();
+        if (ts.id === null) {
+          ts = getDefaultTimesheet();
+        }
 
         if (ts.weekEnding === '') ts.weekEnding = selectedOption.value;
         this.setState({btnSaved: false});
         this.addData(ts);
-        this.setState({timeSheet: ts, billing: ts.billingHours, compensated: ts.compensatedHours});
+
+        this.floatingRequired = ts.floatingRequired;
+        this.vacationRequired = ts.vacationRequired;
+        this.maxFloating = this.user.floating + this.floatingRequired;
+        this.maxVacation = this.user.vacation + this.vacationRequired;
+
+        this.setState({
+          timeSheet: ts,
+          billing: ts.billingHours,
+          compensated: ts.compensatedHours,
+          floatingLeft: this.maxFloating - this.floatingRequired,
+          vacationLeft: this.maxVacation - this.vacationRequired
+        });
+        this.fetchUserData();
       },
       err => {
         console.log('get TimeSheet failed.');
@@ -94,22 +141,13 @@ class TimeSheet extends React.Component {
     );
   }
 
-  convertToDate = dateStr => {
-    let dateSplit = dateStr.split('-');
-    let date = new Date();
-    date.setFullYear(parseInt(dateSplit[0], 10));
-    date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2], 10));
-    date.setHours(12);
-    return date;
-  };
-
   fetchTimeSheets = () => {
     axios.get(this.getAllList, { withCredentials: true}).then(
         resp => {
           let sheets = resp.data;
           let weekends = [];
           let thisWeekend = this.context.getCurrentWeekendOption();
-          if (thisWeekend.value !== sheets[0].weekEnding) weekends.push(thisWeekend);
+          if (sheets.length === 0 || thisWeekend.value !== sheets[0].weekEnding) weekends.push(thisWeekend);
           resp.data.forEach((sheet, idx) => {
             let date = this.convertToDate(sheet.weekEnding);
             weekends.push({
@@ -121,12 +159,23 @@ class TimeSheet extends React.Component {
         },
         err => console.log(err)
     );
+    // this.setState({weekends: this.context.getDefaultWeekends()});
   }
-  onDayChange = (idx, day) => {
+
+  convertToDate = dateStr => {
+    let dateSplit = dateStr.split('-');
+    let date = new Date();
+    date.setFullYear(parseInt(dateSplit[0], 10));
+    date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2], 10));
+    date.setHours(12);
+    return date;
+  };
+  onDayChange = (idx, day, callback) => {
     let ts = this.state.timeSheet;
-    ts.dayDetails[idx] = day;
+    // ts.dayDetails[idx] = day;
     let bh = 0;
     let ch = 0;
+    let floatingRequired = 0, vacationRequired = 0;
     for (let i = 1 ; i <= 5 ; ++i) {
 
       let day = ts.dayDetails[i];
@@ -134,21 +183,36 @@ class TimeSheet extends React.Component {
 
       if (day.floating || day.holiday || day.vacation) ch += 8;
       else ch += day.totalHours;
+
+      if (day.floating) ++floatingRequired;
+      if (day.vacation) ++vacationRequired;
     }
     ts.billingHours = bh;
     ts.compensatedHours = ch;
-    this.setState({billing: bh});
-    this.setState({compensated: ch});
-  }
+    this.floatingRequired = floatingRequired;
+    this.vacationRequired = vacationRequired;
 
-  componentDidMount () {
-    this.fetchTimeSheet(this.state.selectedWeekend);
-    this.fetchTimeSheets();
+    this.setState({
+      billing: bh,
+      compensated: ch,
+      floatingLeft: this.maxFloating - this.floatingRequired,
+      vacationLeft: this.maxVacation - this.vacationRequired
+    });
   }
 
   saveTimeSheet () {
     const selectedFile = this.state.selectedFile;
     const saveFileUrl = this.saveFileUrl;
+    const timeSheet = this.state.timeSheet;
+    timeSheet.floatingRequired = this.floatingRequired;
+    timeSheet.vacationRequired = this.vacationRequired;
+    let comment = '';
+    if (this.floatingRequired > 0) comment = this.floatingRequired + ' Floating day required';
+    if (this.vacationRequired > 0) {
+      if (comment.length > 0) comment += '\n';
+      comment += this.vacationRequired + ' Vacation day required';
+    }
+    timeSheet.comment = comment;
 
     const formData = new FormData();
     if (selectedFile) {
@@ -161,6 +225,10 @@ class TimeSheet extends React.Component {
     // 1. save timeSheet first
     axios.post(this.saveUrl, this.state.timeSheet, {withCredentials: true}).then(
         resp => {
+
+          this.user.floating = this.state.floatingLeft;
+          this.user.vacation = this.state.vacationLeft;
+
           // 2.1 no need to save file
           if (!selectedFile) {
             // setBtnSaved();
@@ -193,11 +261,6 @@ class TimeSheet extends React.Component {
           console.log('save file for timeSheet failed.');
         }
     );
-  }
-
-  setBtnSaved() {
-    this.setState({btnSaved: true});
-    this.setState({selectedFile: null});
   }
 
   setDefault() {
@@ -260,7 +323,9 @@ class TimeSheet extends React.Component {
               </thead>
               <tbody>
                 {this.state.timeSheet && this.state.timeSheet.dayDetails.map((item, idx) => (
-                  <Row key={idx} index={idx} approvalStatus={this.state.timeSheet.approvalStatus} day={item} onDayChange={this.onDayChange} />
+                  <Row key={idx} index={idx} day={item} onDayChange={this.onDayChange}
+                       floatingLeft={this.state.floatingLeft} vacationLeft={this.state.vacationLeft}
+                       approvalStatus={this.state.timeSheet.approvalStatus}   />
                 ))}
               </tbody>
             </table>

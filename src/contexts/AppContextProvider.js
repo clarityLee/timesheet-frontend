@@ -13,15 +13,19 @@ class AppContextProvider extends React.Component {
     let curr = weekend;
 
     let defaultWeekends = [];
-    while(defaultWeekends.length < 5) {
+    while(defaultWeekends.length < 8) {
       let dd = curr.getDate();
       if (dd < 10) dd = '0' + dd.toString();
+      let mm = curr.getMonth() + 1;
+      if (mm < 10) mm = '0' + mm;
       defaultWeekends.push({
-        value: curr.getFullYear() + '-' + (curr.getMonth() + 1) + '-' + dd,
+        value: curr.getFullYear() + '-' + mm + '-' + dd,
         label: curr.toLocaleDateString("en-US", {day: 'numeric', month: 'short', year: 'numeric'})
       });
       curr.setDate(curr.getDate() - 7);
     }
+    // console.log('default weekends:');
+    // console.log(defaultWeekends);
 
     this.selectedWeekend = defaultWeekends[0];
     this.defaultWeekends = defaultWeekends;

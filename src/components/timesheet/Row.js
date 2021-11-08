@@ -108,7 +108,7 @@ const Row = (props) => {
       <td><input type="checkbox" 
             checked={day.floating} 
             onChange={clickFloating} 
-            disabled={floatingDisabled}/>
+            disabled={floatingDisabled || (!day.floating && props.floatingLeft === 0)}/>
       </td>
       <td>
         <input type="checkbox" 
@@ -120,7 +120,7 @@ const Row = (props) => {
         <input type="checkbox" 
           checked={day.vacation} 
           onChange={clickVacation} 
-          disabled={vacationDisabled}/>
+          disabled={vacationDisabled || (!day.vacation && props.vacationLeft === 0)}/>
       </td>
     </tr>
   );
