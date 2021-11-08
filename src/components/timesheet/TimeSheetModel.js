@@ -27,6 +27,11 @@ const setDefaultTimesheet = ts => {
   defaultTimeSheet.billingHours = ts.billingHours;
   defaultTimeSheet.compensatedHours = ts.compensatedHours;
   defaultTimeSheet.dayDetails = JSON.parse(JSON.stringify((ts.dayDetails)))
+  defaultTimeSheet.dayDetails.forEach(day => {
+    day.floating = false;
+    day.holiday = false;
+    day.vacation = false;
+  });
 }
 
 export { getDefaultTimesheet, setDefaultTimesheet };

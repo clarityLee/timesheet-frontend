@@ -5,19 +5,6 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Profile.css'
 
-// import { Button, Container, Row } from 'react-bootstrap';
-
-// const Profile = () => {
-//   return (
-//     <div>
-//         <NavBar />
-//         <div>
-//             Profile
-//         </div>
-//     </div>
-//   );
-// };
-
 class Profile extends React.Component {
 
     changed = new Map()
