@@ -1,15 +1,19 @@
-import React from "react";
-import AppContext from "../../contexts/AppContext";
-import NavBar from "../navbar/NavBar";
-import Select from "react-select";
-import './TimeSheet.css';
+import React from 'react';
+import axios from 'axios';
+import AppContext from '../../contexts/AppContext';
+import Select from 'react-select';
+import NavBar from '../navbar/NavBar';
 import Row from './Row';
-import axios from "axios";
+import isHoliday from './holidays';
+import { getDefaultTimesheet, setDefaultTimesheet } from "./TimeSheetModel";
+import './TimeSheet.css';
 
 class TimeSheet extends React.Component {
   static contextType = AppContext;
   saveUrl = 'http://localhost:9000/timesheet-service/save';
+  saveFileUrl = 'http://localhost:9000/timesheet-service/saveFile'
   getUrl = 'http://localhost:9000/timesheet-service/read';
+  getAllList = 'http://localhost:9000/timesheet-service/getAllList'
 
   constructor(props, context) {
     super(props);
@@ -18,62 +22,49 @@ class TimeSheet extends React.Component {
       compensated: 0,
       timeSheet: null,
       selectedWeekend: context.getSelectedWeekend(),
-      weekends:  context.getWeekends()
+      weekends:  [],
+      selectedFile: null,
+      btnSaved: false,
     }
-    this.loadTimeSheet = this.loadTimeSheet.bind(this);
+    this.loadTimeSheet = this.fetchTimeSheet.bind(this);
     this.onDayChange = this.onDayChange.bind(this);
     this.saveTimeSheet = this.saveTimeSheet.bind(this);
-    this.setDefaultTimeSheet = this.setDefaultTimeSheet.bind(this);
-    if (context.getDefaultTimeSheet() != null)
-      this.defaultTimeSheet = context.getDefaultTimeSheet();
+    this.setDefault = this.setDefault.bind(this);
   }
-
+  btnSaved = '';
   weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  defaultTimeSheet = {
-    "weekEnding": '',
-    "billingHours": 45,
-    "compensatedHours": 45,
-    "submissionStatus": "Not Started",
-    "submissionInfo": "",
-    "approvalStatus": "N/A",
-    "comment": "",
-    "commentInfo": "",
-    "dayDetails": [
-      {"start": "N/A", "end": "N/A", "totalHours": 0, "floating": false, "holiday": false, "vacation": false},
-      {"start": "9:00 AM", "end": "6:00 PM", "totalHours": 9, "floating": false, "holiday": false, "vacation": false},
-      {"start": "9:00 AM", "end": "6:00 PM", "totalHours": 9, "floating": false, "holiday": false, "vacation": false},
-      {"start": "9:00 AM", "end": "6:00 PM", "totalHours": 9, "floating": false, "holiday": false, "vacation": false},
-      {"start": "9:00 AM", "end": "6:00 PM", "totalHours": 9, "floating": false, "holiday": false, "vacation": false},
-      {"start": "9:00 AM", "end": "6:00 PM", "totalHours": 9, "floating": false, "holiday": false, "vacation": false},
-      {"start": "N/A", "end": "N/A", "totalHours": 0, "floating": false, "holiday": false, "vacation": false}
-    ]
-  };
   labels = [
     '0:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM', 
     '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', 
     '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', 
     '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM', '11:00 PM'
   ];
+  uploadOption = 'approved';
+  uploadOptions = [
+    {value: 'approved', label: 'Approved Timesheet'},
+    {value: 'unapproved', label: 'Unapproved Timesheet'}
+  ];
   addData = (sheet) => {
-    // console.log(sheet.weekEnding);
-    let dateSplit = sheet.weekEnding.split('-');
-    // console.log(dateSplit);
-    let date = new Date();
-    date.setFullYear(dateSplit[0]);
-    date.setMonth(dateSplit[1]-1, dateSplit[2]);
-    date.setHours(12);
-    // console.log(date);
-    // console.log(sheet);
-    // let date = new Date(sheet.weekEnding);
+    // let dateSplit = sheet.weekEnding.split('-');
+    // let date = new Date();
+    // date.setFullYear(parseInt(dateSplit[0]));
+    // date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2]));
+    // date.setHours(12);
+    let date = this.convertToDate(sheet.weekEnding);
     for (let i = 6, j=0 ; i >= 0 ; --i, ++j) {
+
       let d = new Date(date);
       d.setDate(d.getDate() - i);
-      // console.log(d);
-      let str = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + 
+      let str = d.getFullYear() + '-' + (d.getMonth()+1) + '-' +
         (d.getDate() < 10 ? '0' : '') + d.getDate();
-      // console.log(str);
+      console.log('adding data to i: ' + i + ', str: ' + str);
       let weekday = this.weekdays[j];
       let day = sheet.dayDetails[j];
+      if (isHoliday(str)) {
+        day['holiday'] = true;
+        day.totalHours = 0;
+      }
+
       day['date'] = str;
       day['weekday'] = weekday;
       day['floatingDisabled'] = false;
@@ -85,51 +76,62 @@ class TimeSheet extends React.Component {
       day['isWeekend'] = weekday === 'Sunday' || weekday === 'Saturday' || day.holiday;
       day['optionDisabled'] = day.isWeekend || day.floating || day.holiday || day.vacation;
       day['resetOptions'] = true;
-      
     }
   };
   
-  loadTimeSheet = (selectedOption) => {
-    const username = window.sessionStorage.getItem("username");
+  fetchTimeSheet = (selectedOption) => {
+    const username = window.sessionStorage.getItem('username');
     const url = this.getUrl + '?username=' + username + '&weekEnding=' + selectedOption.value;
-    const defaultTimeSheet = this.defaultTimeSheet;
-    axios.get(url, {WithCredentials: true}).then(
+
+    axios.get(url, { withCredentials: true }).then(
       resp => {
         let ts = resp.data;
-        if (ts.id === null) {
-          ts = JSON.parse(JSON.stringify(defaultTimeSheet));
-        }
+        if (ts.id === null) ts = getDefaultTimesheet();
 
         if (ts.weekEnding === '') ts.weekEnding = selectedOption.value;
+        this.setState({btnSaved: false});
         this.addData(ts);
         this.setState({timeSheet: ts, billing: ts.billingHours, compensated: ts.compensatedHours});
       },
       err => {
         console.log('get TimeSheet failed.');
+        console.log(err);
       }
     );
   }
 
-  onHourChange = (ts) => {
-    if (!ts && !this.state.timeSheet) return;
-    if (!ts || !ts.hasOwnProperty('dayDetails'))
-      ts = this.state.timeSheet;
-    let bh = 0;
-    let ch = 0;
-    for (let i = 1 ; i <= 5 ; ++i) {
+  convertToDate = dateStr => {
+    let dateSplit = dateStr.split('-');
+    let date = new Date();
+    date.setFullYear(parseInt(dateSplit[0]));
+    date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2]));
+    date.setHours(12);
+    return date;
+  };
 
-      let day = ts.dayDetails[i];
-      bh += day.totalHours;
-      
-      if (day.floating || day.holiday || day.vacation) ch += 8;
-      else ch += day.totalHours;
-    }
-    ts.billingHours = bh;
-    ts.compensatedHours = ch;
-    this.setState({billing: bh});
-    this.setState({compensated: ch});
+  fetchTimeSheets = () => {
+    const username = window.sessionStorage.getItem('username');
+    axios.get(this.getAllList, { withCredentials: true}).then(
+        resp => {
+          let sheets = resp.data;
+          let weekends = [];
+          let thisWeekend = this.context.getCurrentWeekendOption();
+          if (thisWeekend.value !== sheets[0].weekEnding) weekends.push(thisWeekend);
+          console.log(thisWeekend);
+          console.log(sheets[0].weekEnding);
+          resp.data.forEach((sheet, idx) => {
+            let date = this.convertToDate(sheet.weekEnding);
+            weekends.push({
+              value: sheet.weekEnding,
+              label: date.toLocaleDateString("en-US", {day: 'numeric', month: 'short', year: 'numeric'})
+            });
+          });
+          console.log(weekends);
+          this.setState({weekends: weekends});
+        },
+        err => console.log(err)
+    );
   }
-
   onDayChange = (idx, day) => {
     let ts = this.state.timeSheet;
     ts.dayDetails[idx] = day;
@@ -139,7 +141,7 @@ class TimeSheet extends React.Component {
 
       let day = ts.dayDetails[i];
       bh += day.totalHours;
-      
+
       if (day.floating || day.holiday || day.vacation) ch += 8;
       else ch += day.totalHours;
     }
@@ -150,29 +152,82 @@ class TimeSheet extends React.Component {
   }
 
   componentDidMount () {
-    this.setState({selectedWeekend: this.state.selectedWeekend});
-    this.setState({weekends: this.state.weekends});
-    this.loadTimeSheet(this.state.selectedWeekend);
+    this.fetchTimeSheet(this.state.selectedWeekend);
+    this.fetchTimeSheets();
   }
 
   saveTimeSheet () {
-    axios.post(this.saveUrl, this.state.timeSheet, {withCredentials:true}).then(
-      () => console.log('save succeessed.'), 
-      () => console.log('save failed.')
+    const setBtnSaved = this.setBtnSaved;
+    const selectedFile = this.state.selectedFile;
+    const saveFileUrl = this.saveFileUrl;
+    const setState = this.setState;
+
+    const formData = new FormData();
+    if (selectedFile) {
+      formData.append(
+          'file', this.state.selectedFile, this.state.selectedFile.name);
+      formData.append('weekEnding', this.state.timeSheet.weekEnding);
+      formData.append('uploadType', this.uploadOption);
+    }
+    console.log(this.state.timeSheet.weekEnding);
+
+    // 1. save timeSheet first
+    this.state.timeSheet.uploadType = this.uploadOption;
+    axios.post(this.saveUrl, this.state.timeSheet, {withCredentials: true}).then(
+        resp => {
+          console.log('save timeSheet succeed.');
+          // 2.1 no need to save file
+          if (!selectedFile) {
+            // setBtnSaved();
+            this.setState({btnSaved: true});
+            this.setState({selectedFile: null});
+            return;
+          }
+          // 2.2 need to save file
+          axios.post(saveFileUrl, formData, {
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }).then(
+              resp => {
+                // setBtnSaved();
+                this.setState({btnSaved: true});
+                this.setState({selectedFile: null});
+              },
+              err => {
+                // save file failed
+                console.log(err);
+                console.log('save timeSheet without file failed.');
+              }
+          );
+        },
+        err => {
+          // save timesheet failed
+          console.log(err);
+          console.log('save file for timeSheet failed.');
+        }
     );
   }
 
-  setDefaultTimeSheet() {
-    let t = this.defaultTimeSheet;
-    let s = this.state.timeSheet;
-    Object.assign(t, {
-      billingHours: s.billingHours,
-      compensatedHours: s.compensatedHours,
-      dayDetails: JSON.parse(JSON.stringify((s.dayDetails)))
-    })
-    this.context.setDefaultTimeSheet(t);
+  setBtnSaved() {
+    this.setState({btnSaved: true});
+    this.setState({selectedFile: null});
   }
-  
+
+  setDefault() {
+    setDefaultTimesheet(this.state.timeSheet);
+  }
+
+  setUpload = e => {
+    this.uploadOption = e.value;
+    console.log('uploadOption: ' + this.uploadOption);
+  }
+
+  onFileChange = e => {
+    this.setState({ selectedFile: e.target.files[0] });
+  }
+
   render () {
     return (
       <div>
@@ -186,7 +241,7 @@ class TimeSheet extends React.Component {
                 values={this.state.selectedWeekend} 
                 options={this.state.weekends} 
                 defaultValue={this.state.selectedWeekend} 
-                onChange={this.loadTimeSheet}
+                onChange={this.fetchTimeSheet}
               />
             </div>
             <div className="top-item billing">
@@ -198,7 +253,7 @@ class TimeSheet extends React.Component {
               <input type="text" disabled value={this.state.compensated} />
             </div>
           </div>
-          <button onClick={this.setDefaultTimeSheet}>Set Default</button>
+          <button onClick={this.setDefault}>Set Default</button>
           <div>
             <table>
               <thead>
@@ -214,7 +269,6 @@ class TimeSheet extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {/* {this.state.timeSheet && <Details timeSheet={this.state.timeSheet} onHourChange={this.onHourChange}/>} */}
                 {this.state.timeSheet && this.state.timeSheet.dayDetails.map((item, idx) => (
                   <Row key={idx} index={idx} day={item} onDayChange={this.onDayChange} />
                 ))}
@@ -222,9 +276,15 @@ class TimeSheet extends React.Component {
             </table>
           </div>
           <div>
-            <button>update time sheet</button>
-            <button>Choose File</button>
-            <button onClick={this.saveTimeSheet}>Save</button>
+            <Select className="selectUpload bottom-item"
+                defaultValue = {this.uploadOptions[0]}
+                options={this.uploadOptions}
+                onChange={this.setUpload}
+            />
+            <input type="file" className="bottom-item" onChange={this.onFileChange} />
+            <button
+                className={`btnSave bottom-item ${this.state.btnSaved ? 'saved' : 'notSaved'}`}
+                onClick={this.saveTimeSheet} >Save</button>
           </div>
         </div>
       </div>

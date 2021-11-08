@@ -6,6 +6,7 @@ import './NavBar.css';
 
 const NavBar = () => {
   const context = useAppContext();
+  const username = window.sessionStorage.getItem("username");
 
   let navigate = useNavigate ();
   let handleLogout = (e) => {
@@ -29,6 +30,7 @@ const NavBar = () => {
           </li>
         </ul>
       </div>
+      <div className="rightstyle">Welcome {username} !</div>
       <button className="nav-item btn btn-outline-secondary my-2 my-sm-0 rightstyle" onClick={handleLogout}>Logout</button>
     </nav>
   );

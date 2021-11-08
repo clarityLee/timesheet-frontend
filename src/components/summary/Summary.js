@@ -43,7 +43,6 @@ const Summary = (prop) => {
     e.preventDefault();
     context.setSelectedWeekendStr(e.target.attributes.weekending.value);
     navigate("/timesheet");
-    console.log(e);
   };
 
   const renderBody = () => {
@@ -96,7 +95,7 @@ const Summary = (prop) => {
                     href=""
                     className="navItem"
                     onClick={gotoTimeSheet}
-                    weekEnding={weekEnding}
+                    weekending={weekEnding}
                   >
                     view
                   </a>
@@ -133,7 +132,7 @@ const Summary = (prop) => {
       <NavBar setAuthed={prop.setAuthed} />
 
       <h1 id="title">Employee Summary</h1>
-      <table class="table" id="employee">
+      <table className="table" id="employee">
         <thead>
           <tr>{renderHeader()}</tr>
         </thead>

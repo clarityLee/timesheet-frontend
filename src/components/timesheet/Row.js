@@ -4,8 +4,9 @@ import Select from "react-select";
 const Row = (prop) => {
   const day = prop.day;
   const [optionDisabled, setOptionDisabled] = useState(day.optionDisabled);
-  const [floatingDisabled, setFloatingDiabled] = useState(day.isWeekend);
-  const [vacationDisabled, setVacationDiabled] = useState(day.isWeekend);
+  const [floatingDisabled, setFloatingDisabled] = useState(day.isWeekend || day.holiday || day.vacation);
+  const [vacationDisabled, setVacationDisabled] = useState(day.isWeekend || day.floating || day.holiday);
+  const [holidayDisabled, setHolidayDisabled] = useState(true);
   const [startOptionVal, setStartOptionVal] = useState(null);
   const [endOptionVal, setEndOptionVal] = useState(null);
   
@@ -31,17 +32,19 @@ const Row = (prop) => {
     day.floating = !day.floating;
     setTotalHour(day.totalHours);
     setOptionDisabled(day.floating);
-    setVacationDiabled(day.floating);
+    setVacationDisabled(day.floating);
     prop.onDayChange(prop.index, day);
   };
-  const clickHoliday = () => {};
+  const clickHoliday = e => {
+    e.preventDefault();
+  };
   const clickVacation = () => {
     if (day.floating || day.holiday || day.isWeekend) return;
     day.totalHours = day.vacation ? day.endVal - day.startVal : 0;
     day.vacation = !day.vacation;
     setTotalHour(day.totalHours);
     setOptionDisabled(day.vacation);
-    setFloatingDiabled(day.vacation);
+    setFloatingDisabled(day.vacation);
     prop.onDayChange(prop.index, day);
   };
   const handleStartChange = e => {
@@ -69,6 +72,9 @@ const Row = (prop) => {
       setEndOptionVal({value: day.endVal, label: day.end});
       setTotalHour(day.totalHours);
       setOptionDisabled(day.optionDisabled);
+      setHolidayDisabled(!day.holiday);
+      setFloatingDisabled(day.isWeekend || day.holiday || day.vacation);
+      setVacationDisabled(day.isWeekend || day.floating || day.holiday);
     }
   });
 
@@ -107,7 +113,7 @@ const Row = (prop) => {
         <input type="checkbox" 
           checked={day.holiday} 
           onChange={clickHoliday} 
-          disabled={true}/>
+          disabled={holidayDisabled}/>
       </td>
       <td>
         <input type="checkbox" 
