@@ -104,7 +104,7 @@ const Summary = (prop) => {
               <td>{weekEnding}</td>
               <td>{billingHours}</td>
               <td>
-                {submissionStatus != "Incomplete" ? (
+                {submissionStatus !== "Incomplete" ? (
                   <p>{submissionStatus}</p>
                 ) : (
                   <p>
@@ -125,7 +125,7 @@ const Summary = (prop) => {
               </td>
               <td>{approvalStatus}</td>
               <td className="option">
-                {approvalStatus == "Not Approved" ? (
+                {approvalStatus === "Not Approved" ? (
                   <Link to="/timesheet" className="navItem">
                     edit
                   </Link>
@@ -141,7 +141,7 @@ const Summary = (prop) => {
                 )}
               </td>
               <td>
-                {comment == "" ? (
+                {comment === "" ? (
                   <p>{comment}</p>
                 ) : (
                   <p>
@@ -195,7 +195,7 @@ const Summary = (prop) => {
               <td>{weekEnding}</td>
               <td>{billingHours}</td>
               <td>
-                {submissionStatus != "Incomplete" ? (
+                {submissionStatus !== "Incomplete" ? (
                   <p>{submissionStatus}</p>
                 ) : (
                   <p>
@@ -216,7 +216,7 @@ const Summary = (prop) => {
               </td>
               <td>{approvalStatus}</td>
               <td className="option">
-                {approvalStatus == "Not Approved" ? (
+                {approvalStatus === "Not Approved" ? (
                   <Link to="/timesheet" className="navItem">
                     edit
                   </Link>
@@ -232,7 +232,7 @@ const Summary = (prop) => {
                 )}
               </td>
               <td>
-                {comment == "" ? (
+                {comment === "" ? (
                   <p>{comment}</p>
                 ) : (
                   <p>
@@ -261,12 +261,13 @@ const Summary = (prop) => {
     <div>
       <NavBar setAuthed={prop.setAuthed} />
       <h1 id="title">Employee Summary</h1>
-      {showMore == false ? (
+      {showMore === false ? (
         <table className="table" id="employee">
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {data.username == "sam" ? (
+          {data.username ===
+           "sam" ? (
             <tbody>{renderBody()}</tbody>
           ) : (
             <tbody>
@@ -279,7 +280,7 @@ const Summary = (prop) => {
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {data.username == "sam" ? (
+          {data.username === "sam" ? (
             <tbody>{renderBodyAll()}</tbody>
           ) : (
             <tbody>
@@ -289,7 +290,7 @@ const Summary = (prop) => {
         </table>
       )}
       ,
-      {showMore == false ? (
+      {showMore === false ? (
         <button className="btn" onClick={() => setShowMore(!showMore)}>
           Show more
         </button>
