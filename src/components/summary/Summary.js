@@ -30,6 +30,15 @@ const Summary = (prop) => {
     setData2(response.data);
   };
 
+  const hasCurrent = () => {
+    
+    if(data.length==0){
+    setCheck(false)
+    }
+    
+    
+  };
+
   useEffect(() => {
     getData();
     getAll();
@@ -37,11 +46,7 @@ const Summary = (prop) => {
     hasCurrent();
   }, []);
 
-  const hasCurrent = () => {
-    setCheck(false);
-    
-  };
-
+  
   const renderCurrent = () => {
     return (
       <tr>
@@ -266,8 +271,7 @@ const Summary = (prop) => {
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {data.username ===
-           "sam" ? (
+          {check ? (
             <tbody>{renderBody()}</tbody>
           ) : (
             <tbody>
@@ -280,7 +284,7 @@ const Summary = (prop) => {
           <thead>
             <tr>{renderHeader()}</tr>
           </thead>
-          {data.username === "sam" ? (
+          {check ? (
             <tbody>{renderBodyAll()}</tbody>
           ) : (
             <tbody>
