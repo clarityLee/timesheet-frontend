@@ -15,3 +15,21 @@
 .compensated {
 
 }
+.bottom-item {
+  display: inline-block
+}
+.selectUpload {
+  width: 230px
+}
+.btnChooseFile {
+
+}
+.btnSave {
+
+}
+.saved {
+  background-color: lightgreen;
+}
+.notSaved {
+  background-color: lightblue;
+}
