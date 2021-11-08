@@ -8,6 +8,8 @@ const defaultTimeSheet = {
   'approvalStatus': 'N/A',
   'comment': '',
   'commentInfo': '',
+  'floatingRequired': 0,
+  'vacationRequired': 0,
   'dayDetails': [
     {'start': 'N/A', 'end': 'N/A', 'totalHours': 0, 'floating': false, 'holiday': false, 'vacation': false},
     {'start': '9:00 AM', 'end': '6:00 PM', 'totalHours': 9, 'floating': false, 'holiday': false, 'vacation': false},

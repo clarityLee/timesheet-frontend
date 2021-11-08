@@ -5,7 +5,7 @@ import Select from 'react-select';
 import NavBar from '../navbar/NavBar';
 import Row from './Row';
 import isHoliday from './holidays';
-import { getDefaultTimesheet, setDefaultTimesheet } from "./TimeSheetModel";
+import {getDefaultTimesheet, setDefaultTimesheet} from "./TimeSheetModel";
 import './TimeSheet.css';
 
 class TimeSheet extends React.Component {
@@ -26,15 +26,17 @@ class TimeSheet extends React.Component {
       weekends:  [],
       selectedFile: null,
       btnSaved: false,
-      floatingLeft: 3,
-      vacationLeft: 3
+      floatingLeft: 0,
+      vacationLeft: 0
     }
     this.loadTimeSheet = this.fetchTimeSheet.bind(this);
     this.onDayChange = this.onDayChange.bind(this);
     this.saveTimeSheet = this.saveTimeSheet.bind(this);
     this.setDefault = this.setDefault.bind(this);
+    this.saveTimeSheet = this.saveTimeSheet.bind(this);
+    this.fetchTimeSheet = this.fetchTimeSheet.bind(this);
   }
-  user = null;
+  user = {floating: 0, vacation: 0};
 
   componentDidMount () {
     this.fetchUserData();
@@ -45,6 +47,8 @@ class TimeSheet extends React.Component {
   btnSaved = '';
   floatingRequired = 0;
   vacationRequired = 0;
+  maxFloating = 0;
+  maxVacation = 0;
   weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   labels = [
     '0:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM', 
@@ -89,10 +93,13 @@ class TimeSheet extends React.Component {
   fetchUserData = () => {
     axios.get(this.userUrl, { withCredentials: true}).then(
         resp => {
-          const user = resp.data;
-          this.user = user;
-          this.setState({floatingLeft: user.floating});
-          this.setState({vacationLeft: user.vacation});
+          this.user = resp.data;
+          this.maxFloating = this.user.floating + this.floatingRequired;
+          this.maxVacation = this.user.vacation + this.vacationRequired;
+          this.setState({
+            floatingLeft: this.maxFloating - this.floatingRequired,
+            vacationLeft: this.maxVacation - this.vacationRequired
+          });
         },
         err => console.log(err)
     );
@@ -105,12 +112,27 @@ class TimeSheet extends React.Component {
     axios.get(url, { withCredentials: true }).then(
       resp => {
         let ts = resp.data;
-        if (ts.id === null) ts = getDefaultTimesheet();
+        if (ts.id === null) {
+          ts = getDefaultTimesheet();
+        }
 
         if (ts.weekEnding === '') ts.weekEnding = selectedOption.value;
         this.setState({btnSaved: false});
         this.addData(ts);
-        this.setState({timeSheet: ts, billing: ts.billingHours, compensated: ts.compensatedHours});
+
+        this.floatingRequired = ts.floatingRequired;
+        this.vacationRequired = ts.vacationRequired;
+        this.maxFloating = this.user.floating + this.floatingRequired;
+        this.maxVacation = this.user.vacation + this.vacationRequired;
+
+        this.setState({
+          timeSheet: ts,
+          billing: ts.billingHours,
+          compensated: ts.compensatedHours,
+          floatingLeft: this.maxFloating - this.floatingRequired,
+          vacationLeft: this.maxVacation - this.vacationRequired
+        });
+        this.fetchUserData();
       },
       err => {
         console.log('get TimeSheet failed.');
@@ -167,12 +189,15 @@ class TimeSheet extends React.Component {
     }
     ts.billingHours = bh;
     ts.compensatedHours = ch;
-    this.setState({billing: bh});
-    this.setState({compensated: ch});
-    this.setState({floatingLeft: this.user.floating - floatingRequired});
-    this.setState({vacationLeft: this.user.vacation - vacationRequired});
     this.floatingRequired = floatingRequired;
     this.vacationRequired = vacationRequired;
+
+    this.setState({
+      billing: bh,
+      compensated: ch,
+      floatingLeft: this.maxFloating - this.floatingRequired,
+      vacationLeft: this.maxVacation - this.vacationRequired
+    });
   }
 
   saveTimeSheet () {
@@ -201,8 +226,8 @@ class TimeSheet extends React.Component {
     axios.post(this.saveUrl, this.state.timeSheet, {withCredentials: true}).then(
         resp => {
 
-          this.user.floatingLeft = this.state.floatingLeft;
-          this.user.vacationLeft = this.state.vacationLeft;
+          this.user.floating = this.state.floatingLeft;
+          this.user.vacation = this.state.vacationLeft;
 
           // 2.1 no need to save file
           if (!selectedFile) {
