@@ -7,7 +7,8 @@
 .weekend {
 }
 .options {
-  width: 150px;
+  /* width: 150px; */
+  width: 200px;
 }
 .billing {
 
@@ -32,4 +33,10 @@
 }
 .notSaved {
   background-color: lightblue;
+}
+.row {
+  padding-top: 16px;
+}
+.table{
+  box-shadow: none;
 }
