@@ -217,29 +217,35 @@ class TimeSheet extends React.Component {
       <div>
         <NavBar />
         {/* <NavBar setAuthed={this.props.setAuthed}/> */}
-        <div>
-          <div className="top">
-            <div className="top-item weekend">
-              <span>Week Ending</span>
-              <Select className="top-item options" 
-                values={this.state.selectedWeekend} 
-                options={this.state.weekends} 
-                defaultValue={this.state.selectedWeekend} 
-                onChange={this.fetchTimeSheet}
-              />
-            </div>
-            <div className="top-item billing">
-              <span>Total Billing Hours</span>
-              <input type="text" disabled value={this.state.billing} />
-            </div>
-            <div className="top-item compensated">
-              <span>Total Compensated Hours</span>
-              <input type="text" disabled value={this.state.compensated} />
+        <div className="container">
+          <div className="top row">
+            <div className="d-flex justify-content-between">
+              <div className="top-item weekend">
+                <span style={{fontWeight: "bold"}}>Week Ending </span>
+                <Select className="top-item options" 
+                  values={this.state.selectedWeekend} 
+                  options={this.state.weekends} 
+                  defaultValue={this.state.selectedWeekend} 
+                  onChange={this.fetchTimeSheet}
+                />
+              </div>
+              <div className="top-item billing">
+                <span style={{fontWeight: "bold"}}>Total Billing Hours </span>
+                <input type="text" disabled value={this.state.billing} />
+              </div>
+              <div className="top-item compensated">
+                <span style={{fontWeight: "bold"}}>Total Compensated Hours </span>
+                <input type="text" disabled value={this.state.compensated} />
+              </div>
             </div>
           </div>
-          <button onClick={this.setDefault}>Set Default</button>
-          <div>
-            <table>
+          <div className="row">
+            <div className="d-flex flex-row-reverse">
+              <button className="btn btn-outline-primary btn-lg align-self-center" onClick={this.setDefault}>Set Default</button>
+            </div>
+          </div>
+          <div className="row">
+            <table className="table">
               <thead>
                 <tr>
                   <th>Day</th>
@@ -259,16 +265,21 @@ class TimeSheet extends React.Component {
               </tbody>
             </table>
           </div>
-          <div>
-            <Select className="selectUpload bottom-item"
-                defaultValue={this.uploadOptions[0]}
-                options={this.uploadOptions}
-                onChange={this.setUpload}
-            />
-            <input type="file" className="bottom-item" onChange={this.onFileChange} />
-            <button
-                className={`btnSave bottom-item ${this.state.btnSaved ? 'saved' : 'notSaved'}`}
-                onClick={this.saveTimeSheet} >Save</button>
+          <div className="d-flex justify-content-between">
+            <div>
+              <Select className="selectUpload bottom-item"
+                  defaultValue={this.uploadOptions[0]}
+                  options={this.uploadOptions}
+                  onChange={this.setUpload}
+              />
+              <input type="file" className="bottom-item" onChange={this.onFileChange} />
+            </div>
+            <div>
+              <button
+                  // className={`btnSave bottom-item ${this.state.btnSaved ? 'saved' : 'notSaved'}`}
+                  className={`btn bottom-item btn-lg ${this.state.btnSaved ? 'btn-success' : 'btn-outline-primary'}`}
+                  onClick={this.saveTimeSheet} >Save</button>
+            </div>
           </div>
         </div>
       </div>
