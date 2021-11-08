@@ -39,7 +39,7 @@ const Summary = (prop) => {
     });
   };
 
-  const gotoTimeSheet = e => {
+  const gotoTimeSheet = (e) => {
     e.preventDefault();
     context.setSelectedWeekendStr(e.target.attributes.weekending.value);
     navigate("/timesheet");
@@ -54,7 +54,7 @@ const Summary = (prop) => {
         ({
           id,
           weekEnding,
-          billingHouse,
+          billingHours,
           submissionStatus,
           approvalStatus,
           comment,
@@ -63,9 +63,9 @@ const Summary = (prop) => {
           return (
             <tr key={id}>
               <td>{weekEnding}</td>
-              <td>{billingHouse}</td>
+              <td>{billingHours}</td>
               <td>
-                {submissionStatus != "incomplete" ? (
+                {submissionStatus != "Incomplete" ? (
                   <p>{submissionStatus}</p>
                 ) : (
                   <p>
@@ -91,7 +91,12 @@ const Summary = (prop) => {
                     edit
                   </Link>
                 ) : (
-                  <a href="" className="navItem" onClick={gotoTimeSheet} weekending={weekEnding}>
+                  <a
+                    href=""
+                    className="navItem"
+                    onClick={gotoTimeSheet}
+                    weekending={weekEnding}
+                  >
                     view
                   </a>
                 )}
