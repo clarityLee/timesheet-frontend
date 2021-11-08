@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 
-const Row = (prop) => {
-  const day = prop.day;
+const Row = (props) => {
+  const day = props.day;
   const [optionDisabled, setOptionDisabled] = useState(day.optionDisabled);
   const [floatingDisabled, setFloatingDisabled] = useState(day.isWeekend || day.holiday || day.vacation);
   const [vacationDisabled, setVacationDisabled] = useState(day.isWeekend || day.floating || day.holiday);
@@ -27,25 +27,25 @@ const Row = (prop) => {
   }
   
   const clickFloating = () => {
-    if (day.holiday || day.vacation || day.isWeekend) return;
+    if (day.holiday || day.vacation || day.isWeekend || props.approvalStatus === 'Approved') return;
     day.totalHours = day.floating ? day.endVal - day.startVal : 0;
     day.floating = !day.floating;
     setTotalHour(day.totalHours);
     setOptionDisabled(day.floating);
     setVacationDisabled(day.floating);
-    prop.onDayChange(prop.index, day);
+    props.onDayChange(props.index, day);
   };
   const clickHoliday = e => {
     e.preventDefault();
   };
   const clickVacation = () => {
-    if (day.floating || day.holiday || day.isWeekend) return;
+    if (day.floating || day.holiday || day.isWeekend || props.approvalStatus === 'Approved') return;
     day.totalHours = day.vacation ? day.endVal - day.startVal : 0;
     day.vacation = !day.vacation;
     setTotalHour(day.totalHours);
     setOptionDisabled(day.vacation);
     setFloatingDisabled(day.vacation);
-    prop.onDayChange(prop.index, day);
+    props.onDayChange(props.index, day);
   };
   const handleStartChange = e => {
     day.start = e.label;
@@ -54,7 +54,7 @@ const Row = (prop) => {
     day.totalHours = day.endVal - day.startVal;
     setTotalHour(day.totalHours);
     setStartOptionVal(day.startOptionVal);
-    prop.onDayChange(prop.index, day);
+    props.onDayChange(props.index, day);
   };
   const handleEndChange = e => {
     day.end = e.label;
@@ -63,7 +63,7 @@ const Row = (prop) => {
     day.totalHours = day.endVal - day.startVal;
     setTotalHour(day.totalHours);
     setEndOptionVal(day.startOptionVal);
-    prop.onDayChange(prop.index, day);
+    props.onDayChange(props.index, day);
   }
   useEffect(() => {
     if (day.resetOptions) {
@@ -83,23 +83,23 @@ const Row = (prop) => {
       <td>{day.weekday}</td>
       <td>{day.date}</td>
       <td>
-        {!optionDisabled && !prop.day.isWeekend
+        {!optionDisabled && !props.day.isWeekend
           ? <Select 
               options={options} 
               onChange={handleStartChange}
               value={startOptionVal} 
-              isDisabled={prop.day.isWeekend}/>
+              isDisabled={props.day.isWeekend || props.approvalStatus === 'Approved'}/>
           : <div>N/A</div>
         }
         {/* {optionDisabled || disabled && <div>N/A</div>} */}
       </td>
       <td>
-        {!optionDisabled && !prop.day.isWeekend
+        {!optionDisabled && !props.day.isWeekend
           ? <Select 
               options={options} 
               onChange={handleEndChange}
               value={endOptionVal}
-              isDisabled={prop.day.isWeekend}/>
+              isDisabled={props.day.isWeekend || props.approvalStatus === 'Approved'}/>
           : <div>N/A</div>
         }
       </td>

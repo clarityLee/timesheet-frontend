@@ -45,11 +45,6 @@ class TimeSheet extends React.Component {
     {value: 'unapproved', label: 'Unapproved Timesheet'}
   ];
   addData = (sheet) => {
-    // let dateSplit = sheet.weekEnding.split('-');
-    // let date = new Date();
-    // date.setFullYear(parseInt(dateSplit[0]));
-    // date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2]));
-    // date.setHours(12);
     let date = this.convertToDate(sheet.weekEnding);
     for (let i = 6, j=0 ; i >= 0 ; --i, ++j) {
 
@@ -57,7 +52,6 @@ class TimeSheet extends React.Component {
       d.setDate(d.getDate() - i);
       let str = d.getFullYear() + '-' + (d.getMonth()+1) + '-' +
         (d.getDate() < 10 ? '0' : '') + d.getDate();
-      console.log('adding data to i: ' + i + ', str: ' + str);
       let weekday = this.weekdays[j];
       let day = sheet.dayDetails[j];
       if (isHoliday(str)) {
@@ -103,22 +97,19 @@ class TimeSheet extends React.Component {
   convertToDate = dateStr => {
     let dateSplit = dateStr.split('-');
     let date = new Date();
-    date.setFullYear(parseInt(dateSplit[0]));
-    date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2]));
+    date.setFullYear(parseInt(dateSplit[0], 10));
+    date.setMonth(dateSplit[1]-1, parseInt(dateSplit[2], 10));
     date.setHours(12);
     return date;
   };
 
   fetchTimeSheets = () => {
-    const username = window.sessionStorage.getItem('username');
     axios.get(this.getAllList, { withCredentials: true}).then(
         resp => {
           let sheets = resp.data;
           let weekends = [];
           let thisWeekend = this.context.getCurrentWeekendOption();
           if (thisWeekend.value !== sheets[0].weekEnding) weekends.push(thisWeekend);
-          console.log(thisWeekend);
-          console.log(sheets[0].weekEnding);
           resp.data.forEach((sheet, idx) => {
             let date = this.convertToDate(sheet.weekEnding);
             weekends.push({
@@ -126,7 +117,6 @@ class TimeSheet extends React.Component {
               label: date.toLocaleDateString("en-US", {day: 'numeric', month: 'short', year: 'numeric'})
             });
           });
-          console.log(weekends);
           this.setState({weekends: weekends});
         },
         err => console.log(err)
@@ -157,10 +147,8 @@ class TimeSheet extends React.Component {
   }
 
   saveTimeSheet () {
-    const setBtnSaved = this.setBtnSaved;
     const selectedFile = this.state.selectedFile;
     const saveFileUrl = this.saveFileUrl;
-    const setState = this.setState;
 
     const formData = new FormData();
     if (selectedFile) {
@@ -169,13 +157,10 @@ class TimeSheet extends React.Component {
       formData.append('weekEnding', this.state.timeSheet.weekEnding);
       formData.append('uploadType', this.uploadOption);
     }
-    console.log(this.state.timeSheet.weekEnding);
 
     // 1. save timeSheet first
-    this.state.timeSheet.uploadType = this.uploadOption;
     axios.post(this.saveUrl, this.state.timeSheet, {withCredentials: true}).then(
         resp => {
-          console.log('save timeSheet succeed.');
           // 2.1 no need to save file
           if (!selectedFile) {
             // setBtnSaved();
@@ -221,7 +206,6 @@ class TimeSheet extends React.Component {
 
   setUpload = e => {
     this.uploadOption = e.value;
-    console.log('uploadOption: ' + this.uploadOption);
   }
 
   onFileChange = e => {
@@ -270,14 +254,14 @@ class TimeSheet extends React.Component {
               </thead>
               <tbody>
                 {this.state.timeSheet && this.state.timeSheet.dayDetails.map((item, idx) => (
-                  <Row key={idx} index={idx} day={item} onDayChange={this.onDayChange} />
+                  <Row key={idx} index={idx} approvalStatus={this.state.timeSheet.approvalStatus} day={item} onDayChange={this.onDayChange} />
                 ))}
               </tbody>
             </table>
           </div>
           <div>
             <Select className="selectUpload bottom-item"
-                defaultValue = {this.uploadOptions[0]}
+                defaultValue={this.uploadOptions[0]}
                 options={this.uploadOptions}
                 onChange={this.setUpload}
             />
